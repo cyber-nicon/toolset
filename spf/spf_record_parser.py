@@ -1,16 +1,16 @@
 # spf_record_parser.py
 # Author: nicon
 # Created 04/24 - 05/03/2026
-# Last updated: 05/04/2026
+# Last updated: 06/14/2026
 # This peace of code, can be used to determine all
 # ipv4 and ipv6 Adresses covered by a Domains SPF Entry
 
 # to run this code simply give the wanted domain as argument
-# if wanted output will be a list of ipv4 and ipv6 in csv
+# output will be a list of ipv4 and ipv6 in csv
 
 # the script is capped initially by 15 dns requests
 # this is a requrement to a valid SPF record based on RFC
-# if you want to cover all from your domain just increase "max_dns_requests"
+# if you want to cover all from your domain just increase 
 # but make sure that you don't run into a loop
 
 import dns.resolver
@@ -45,171 +45,67 @@ def is_ip_subnet(ip) -> bool:
 
 for every_domain in spf_include:
     if(request_counter < max_dns_requests):
-        print("start finding spf for:", every_domain)
-        request_answer = dns.resolver.resolve(every_domain, "TXT")
-        request_counter += 1
+        print("Domain:", every_domain)
+        continue_q = input("Do you want to continue with checking and adding the domain aboth? (y/n)")
+        if(continue_q == "y"):
+            print("start finding spf for:", every_domain)
+            request_answer = dns.resolver.resolve(every_domain, "TXT")
+            request_counter += 1
 
-        initial_spf = ""
+            initial_spf = ""
 
-        for i in request_answer:
-            initial_spf=i.to_text()
-            if(initial_spf.startswith('"v=spf1')):
-                print("### Found SPF ####")
-                print(initial_spf)
-                print("##################")
-                break
+            for i in request_answer:
+                initial_spf=i.to_text()
+                if(initial_spf.startswith('"v=spf1')):
+                    print("### Found SPF ####")
+                    print(initial_spf)
+                    print("##################")
+                    break
 
-        initial_spf = initial_spf.replace('" "', '')
-        print(initial_spf)
-        spf_entries = []
-        # take initial spf record and split after each space
-        word = ""
-        spf_a = []
-        spf_mx = []
-        spf_ip4 = []
-        spf_ip6 = []
-        for i in initial_spf:
-            if(i != " "):
-                word += i
-            else:
-                spf_entries.append(word)
-                if(word.startswith("include:")):
-                    spf_include.append(word[8:])
-                elif(word.startswith("a")):
-                    spf_a.append(word)
-                elif(word.startswith("mx")):
-                    spf_mx.append(word)
-                elif(word.startswith("ip4:")):
-                    spf_ip4.append(word)
-                    all_ip4.append(word[4:])
-                elif(word.startswith("ip6:")):
-                    spf_ip6.append(word)
-                    all_ip6.append(word[4:])
-                word = ""
-            
-        print(spf_entries)
-        print("##################")
-        print(spf_include)
-        print(spf_a)
-        print(spf_mx)
-        print(spf_ip4)
-        print(spf_ip6)
-
-
-        print("starting resolving A and AAAA records now:")
-        for i in spf_a:
-            if (request_counter < max_dns_requests):
-                if (i == "a"):
-                    print("try resolve A and AAAA:", every_domain)
-                    try:
-                        request_answer = dns.resolver.resolve(every_domain, "A")
-                        for a in request_answer:
-                            print (a.to_text())
-                            all_ip4.append(a.to_text())
-                    except dns.resolver.NoAnswer:
-                        print("No A Record for Domain")
-                    except dns.revolser.NXDOMAIN:
-                        print("Domain not existing")
-                    except dns.resolver.TIMEOUT:
-                        print("DNS not answering")
-                    except Exception as e:
-                        print("A Unusal Error occured:", e)
-
-                    request_counter += 1
-
-                    try:
-                        request_answer = dns.resolver.resolve(every_domain, "AAAA")
-                        for a in request_answer:
-                            print (a.to_text())
-                            all_ip6.append(a.to_text())
-                    except dns.resolver.NoAnswer:
-                        print("No AAAA Record for Domain")
-                    except dns.revolser.NXDOMAIN:
-                        print("Domain not existing")
-                    except dns.resolver.TIMEOUT:
-                        print("DNS not answering")
-                    except Exception as e:
-                        print("A Unusal Error occured:", e)
-                    
-                    request_counter += 1
+            initial_spf = initial_spf.replace('" "', '')
+            print(initial_spf)
+            spf_entries = []
+            # take initial spf record and split after each space
+            word = ""
+            spf_a = []
+            spf_mx = []
+            spf_ip4 = []
+            spf_ip6 = []
+            for i in initial_spf:
+                if(i != " "):
+                    word += i
                 else:
-                    print("try resolve A and AAAA:", i[2:])
-                    try:
-                        request_answer = dns.resolver.resolve(i[2:], "A")
-                        for a in request_answer:
-                            print (a.to_text())
-                            all_ip4.append(a.to_text())
-                    except dns.resolver.NoAnswer:
-                        print("No A Record for Domain")
-                    except dns.revolser.NXDOMAIN:
-                        print("Domain not existing")
-                    except dns.resolver.TIMEOUT:
-                        print("DNS not answering")
-                    except Exception as e:
-                        print("A Unusal Error occured:", e)
+                    spf_entries.append(word)
+                    if(word.startswith("include:")):
+                        spf_include.append(word[8:])
+                    elif(word.startswith("a")):
+                        spf_a.append(word)
+                    elif(word.startswith("mx")):
+                        spf_mx.append(word)
+                    elif(word.startswith("ip4:")):
+                        spf_ip4.append(word)
+                        all_ip4.append(word[4:])
+                    elif(word.startswith("ip6:")):
+                        spf_ip6.append(word)
+                        all_ip6.append(word[4:])
+                    word = ""
+                
+            print(spf_entries)
+            print("##################")
+            print(spf_include)
+            print(spf_a)
+            print(spf_mx)
+            print(spf_ip4)
+            print(spf_ip6)
 
-                    request_counter += 1
 
-                    try:
-                        request_answer = dns.resolver.resolve(i[2:], "AAAA")
-                        for a in request_answer:
-                            print (a.to_text())
-                            all_ip6.append(a.to_text())
-                    except dns.resolver.NoAnswer:
-                        print("No AAAA Record for Domain")
-                    except dns.revolser.NXDOMAIN:
-                        print("Domain not existing")
-                    except dns.resolver.TIMEOUT:
-                        print("DNS not answering")
-                    except Exception as e:
-                        print("A Unusal Error occured:", e)
-                    
-                    request_counter += 1
-
-        print("start resolving MX records and ipv4 plus ipv6 out of it")
-        mx_records = []
-        for mx in spf_mx:
-            if(request_counter < max_dns_requests):
-                if(mx == "mx"):
-                    print("try resolve MX of:", every_domain)
-                    try:
-                        request_answer = dns.resolver.resolve(every_domain, "MX")
-                        for a in request_answer:
-                            print (a.to_text())
-                            mx_records.append(a.to_text())
-                    except dns.resolver.NoAnswer:
-                        print("No MX Record for Domain")
-                    except dns.revolser.NXDOMAIN:
-                        print("Domain not existing")
-                    except dns.resolver.TIMEOUT:
-                        print("DNS not answering")
-                    except Exception as e:
-                        print("A Unusal Error occured:", e)
-
-                    request_counter += 1
-                else:
-                    print("try resolve MX of:", i[2:])
-                    try:
-                        request_answer = dns.resolver.resolve(i[2:], "MX")
-                        for a in request_answer:
-                            print (a.to_text())
-                            mx_records.append(a.to_text())
-                    except dns.resolver.NoAnswer:
-                        print("No MX Record for Domain")
-                    except dns.revolser.NXDOMAIN:
-                        print("Domain not existing")
-                    except dns.resolver.TIMEOUT:
-                        print("DNS not answering")
-                    except Exception as e:
-                        print("A Unusal Error occured:", e)
-
-                    request_counter += 1
-
-                for i in mx_records:
-                    if(request_counter < max_dns_requests):
-                        print("try resolve A and AAAA:", i)
+            print("starting resolving A and AAAA records now:")
+            for i in spf_a:
+                if (request_counter < max_dns_requests):
+                    if (i == "a"):
+                        print("try resolve A and AAAA:", every_domain)
                         try:
-                            request_answer = dns.resolver.resolve(i, "A")
+                            request_answer = dns.resolver.resolve(every_domain, "A")
                             for a in request_answer:
                                 print (a.to_text())
                                 all_ip4.append(a.to_text())
@@ -225,7 +121,7 @@ for every_domain in spf_include:
                         request_counter += 1
 
                         try:
-                            request_answer = dns.resolver.resolve(i, "AAAA")
+                            request_answer = dns.resolver.resolve(every_domain, "AAAA")
                             for a in request_answer:
                                 print (a.to_text())
                                 all_ip6.append(a.to_text())
@@ -238,13 +134,122 @@ for every_domain in spf_include:
                         except Exception as e:
                             print("A Unusal Error occured:", e)
                         
-                    request_counter += 1
-        print("current requests:", request_counter)
-        print("#####################################")
-        print("#####################################")
-        print("#####################################")
-        print("#####################################")
-        print("#####################################")
+                        request_counter += 1
+                    else:
+                        print("try resolve A and AAAA:", i[2:])
+                        try:
+                            request_answer = dns.resolver.resolve(i[2:], "A")
+                            for a in request_answer:
+                                print (a.to_text())
+                                all_ip4.append(a.to_text())
+                        except dns.resolver.NoAnswer:
+                            print("No A Record for Domain")
+                        except dns.revolser.NXDOMAIN:
+                            print("Domain not existing")
+                        except dns.resolver.TIMEOUT:
+                            print("DNS not answering")
+                        except Exception as e:
+                            print("A Unusal Error occured:", e)
+
+                        request_counter += 1
+
+                        try:
+                            request_answer = dns.resolver.resolve(i[2:], "AAAA")
+                            for a in request_answer:
+                                print (a.to_text())
+                                all_ip6.append(a.to_text())
+                        except dns.resolver.NoAnswer:
+                            print("No AAAA Record for Domain")
+                        except dns.revolser.NXDOMAIN:
+                            print("Domain not existing")
+                        except dns.resolver.TIMEOUT:
+                            print("DNS not answering")
+                        except Exception as e:
+                            print("A Unusal Error occured:", e)
+                        
+                        request_counter += 1
+
+            print("start resolving MX records and ipv4 plus ipv6 out of it")
+            mx_records = []
+            for mx in spf_mx:
+                if(request_counter < max_dns_requests):
+                    if(mx == "mx"):
+                        print("try resolve MX of:", every_domain)
+                        try:
+                            request_answer = dns.resolver.resolve(every_domain, "MX")
+                            for a in request_answer:
+                                print (a.to_text())
+                                mx_records.append(a.to_text())
+                        except dns.resolver.NoAnswer:
+                            print("No MX Record for Domain")
+                        except dns.revolser.NXDOMAIN:
+                            print("Domain not existing")
+                        except dns.resolver.TIMEOUT:
+                            print("DNS not answering")
+                        except Exception as e:
+                            print("A Unusal Error occured:", e)
+
+                        request_counter += 1
+                    else:
+                        print("try resolve MX of:", i[2:])
+                        try:
+                            request_answer = dns.resolver.resolve(i[2:], "MX")
+                            for a in request_answer:
+                                print (a.to_text())
+                                mx_records.append(a.to_text())
+                        except dns.resolver.NoAnswer:
+                            print("No MX Record for Domain")
+                        except dns.revolser.NXDOMAIN:
+                            print("Domain not existing")
+                        except dns.resolver.TIMEOUT:
+                            print("DNS not answering")
+                        except Exception as e:
+                            print("A Unusal Error occured:", e)
+
+                        request_counter += 1
+
+                    for i in mx_records:
+                        if(request_counter < max_dns_requests):
+                            print("try resolve A and AAAA:", i)
+                            try:
+                                request_answer = dns.resolver.resolve(i, "A")
+                                for a in request_answer:
+                                    print (a.to_text())
+                                    all_ip4.append(a.to_text())
+                            except dns.resolver.NoAnswer:
+                                print("No A Record for Domain")
+                            except dns.revolser.NXDOMAIN:
+                                print("Domain not existing")
+                            except dns.resolver.TIMEOUT:
+                                print("DNS not answering")
+                            except Exception as e:
+                                print("A Unusal Error occured:", e)
+
+                            request_counter += 1
+
+                            try:
+                                request_answer = dns.resolver.resolve(i, "AAAA")
+                                for a in request_answer:
+                                    print (a.to_text())
+                                    all_ip6.append(a.to_text())
+                            except dns.resolver.NoAnswer:
+                                print("No AAAA Record for Domain")
+                            except dns.revolser.NXDOMAIN:
+                                print("Domain not existing")
+                            except dns.resolver.TIMEOUT:
+                                print("DNS not answering")
+                            except Exception as e:
+                                print("A Unusal Error occured:", e)
+                            
+                        request_counter += 1
+            print("current requests:", request_counter)
+            print("#####################################")
+            print("#####################################")
+            print("#####################################")
+            print("#####################################")
+            print("#####################################")
+        else:
+            print("domain skipped")
 
 
 print(all_ip4)
