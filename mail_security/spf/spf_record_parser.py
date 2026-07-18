@@ -1,7 +1,7 @@
 # spf_record_parser.py
 # Author: nicon
 # Created 04/24 - 05/03/2026
-# Last updated: 06/14/2026
+# Last updated: 07/18/2026
 # This peace of code, can be used to determine all
 # ipv4 and ipv6 Adresses covered by a Domains SPF Entry
 
@@ -248,6 +248,7 @@ for every_domain in spf_include:
             print("#####################################")
             print("#####################################")
             print("#####################################")
+            print(len(all_ip4))
         else:
             print("domain skipped")
 
@@ -280,7 +281,8 @@ if(store_all_hosts_to_csv == "y"):
     with open("ipv4_output.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(ipv4_hosts)
-    print("done!")
+        
+    print("wrote " + str(len(ipv4_hosts)) + " hosts into csv")
 else:
     print("okay, nothing stored")
 
